@@ -6,3 +6,4 @@ from .loss import __init__
 
 # import the trianing methods
 from .train import *
+from .CrossValidation import *
