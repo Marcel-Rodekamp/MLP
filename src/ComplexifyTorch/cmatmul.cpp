@@ -10,7 +10,7 @@ torch::Tensor cmatmul_cpu(torch::Tensor & input, torch::Tensor & other){
         // real part
         at::matmul(at::real(input),at::real(other))-at::matmul(at::imag(input),at::imag(other)),
         // imag part
-        at::matmul(at::real(input),at::imag(other))-at::matmul(at::imag(input),at::real(other))
+        at::matmul(at::real(input),at::imag(other))+at::matmul(at::imag(input),at::real(other))
     );
 }
 
