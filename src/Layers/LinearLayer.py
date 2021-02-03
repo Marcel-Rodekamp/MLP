@@ -43,7 +43,7 @@ class CLinearFunction(torch.autograd.Function):
 clinear =  CLinearFunction.apply
 
 class CLinearLayer(torch.nn.Module):
-    def __init__(self,in_features,out_features,dtype,bias = True):
+    def __init__(self,in_features,out_features,dtype=torch.cdouble,bias = True):
         r"""
             in_features: int
                 Input dimension
@@ -54,7 +54,7 @@ class CLinearLayer(torch.nn.Module):
             bias: bool, default: True
                 Usage of a additive bias term.
 
-            This is a replica of the PyTorch linear layer allowing for a general
+            This is a replica of the PyTorch linear layer allowing for a complex
             dtype of the weight and bias parameters.
 
         """
@@ -78,4 +78,4 @@ class CLinearLayer(torch.nn.Module):
         return clinear(input,self.weight,self.bias)
 
     def extra_repr(self):
-        return f"in_features={self.in_features}, out_features={self.out_features}, bias={self.bias is not None}, dtype={self.dtype}"
+        return f"in_features={self.in_features}, out_features={self.out_features}, bias={self.bias is not None}"
