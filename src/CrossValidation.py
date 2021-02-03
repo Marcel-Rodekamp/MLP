@@ -72,7 +72,7 @@ def CrossValidation(data,model,optimizer,loss_function,CV_params):
         # 7. Resetting the model
         # Optional: if CV_params["keep last training"] is True, model will not be
         #           resetted after last fold
-        if(CV_params["keep last training"] and i_fold == num_folds-1):
+        if(CV_params["keep last training"] and fold_id == CV_params["folds"]-1):
             pass
         else:
             model.load_state_dict(model_state_backup)
