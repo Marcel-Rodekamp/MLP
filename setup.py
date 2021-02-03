@@ -78,6 +78,7 @@ setup_kwargs = dict(
         "MLP.activation": "src/Activations/",
         "MLP.layer": "src/Layers/",
         "MLP.loss": "src/LossFunctions/",
+        "MLP.data": "src/DataHandling/",
     },
     packages = [
         "MLP",
@@ -85,6 +86,7 @@ setup_kwargs = dict(
         "MLP.activation",
         "MLP.layer",
         "MLP.loss",
+        "MLP.data",
     ],
     ext_modules=[
         complexifyTorch,
