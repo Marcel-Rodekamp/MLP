@@ -13,6 +13,7 @@ wd = 10
 num_epochs = 100
 device = torch.device("cpu")
 #}
+torch.autograd.detect_anomaly()
 
 # ==============================================================================
 # The training data for this test case is only artifically random drawn data of
