@@ -14,5 +14,7 @@ torch.ops.load_library(module_path/"libcomplexifyTorch_cpp.so")
 #cmatmul = torch.ops.complexifyTorch_cpp.cmatmul
 cmatmul = torch.ops.complexifyTorch_cpp.cmatmul
 
+cmm = torch.ops.complexifyTorch_cpp.cmm
+
 # cadd(Tensor,Tensor) -> Tensor
 cadd = torch.ops.complexifyTorch_cpp.cadd

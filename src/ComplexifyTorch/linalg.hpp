@@ -12,6 +12,7 @@ torch::Tensor cadd_cpu(torch::Tensor & input, torch::Tensor & other);
 
 TORCH_LIBRARY(complexifyTorch_cpp, m){
     m.def("cmatmul(Tensor input, Tensor other) -> Tensor");
+    m.def("cmm(Tensor input, Tensor other) -> Tensor");
     m.def("cadd(Tensor input, Tensor other) -> Tensor");
 }
 

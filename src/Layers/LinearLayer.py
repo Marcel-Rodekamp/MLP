@@ -1,13 +1,13 @@
 import torch
 
-from ..complexifyTorch import cmatmul,cadd
+from ..complexifyTorch import cmm,cadd
 
 class CLinearFunction(torch.autograd.Function):
     @staticmethod
     def forward(self,input,weight,bias=None):
         self.save_for_backward(input,weight,bias)
 
-        output = cmatmul(input,weight.t())
+        output = cmm(input,weight.t())
 
         if bias is not None:
             output = cadd(output,bias)
@@ -24,12 +24,12 @@ class CLinearFunction(torch.autograd.Function):
 
         # df(x,w,b)/dx = w^T
         if self.needs_input_grad[0]:
-            input_out = cmatmul(grad_output,weight.t())
+            input_out = cmm(grad_output,weight)
             # print(f"input_out.size() = {input_out.size()}")
 
         # df(x,w,b)/dw = x
         if self.needs_input_grad[1]:
-            weight_out = cmatmul(grad_output.t(),input)
+            weight_out = cmm(grad_output.t(),input)
             # print(f"weight_out.size() = {weight_out.size()}")
 
         # df(x,w,b)/db = 1
