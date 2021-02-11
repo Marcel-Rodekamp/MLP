@@ -49,7 +49,7 @@ def CrossValidation(data,model,optimizer,loss_function,CV_params):
     model_state_backup = model.state_dict()
 
     for fold_id in range(CV_params["folds"]):
-        print(f"Training Model on Fold ({fold_id}/{CV_params['folds']}) for {CV_params['epochs']} epochs.")
+        print(f"Training Model on Fold ({fold_id}/{CV_params['folds']-1}) for {CV_params['epochs']} epochs.")
         # 5. Identify validation data  and prepare DataLoaders
         train_index_list = list(range(0,fold_id*Nv))+list(range((fold_id+1)*Nv,N))
         valid_index_list = list(range(fold_id*Nv,(fold_id+1)*Nv))
@@ -73,7 +73,7 @@ def CrossValidation(data,model,optimizer,loss_function,CV_params):
         # Optional: if CV_params["keep last training"] is True, model will not be
         #           resetted after last fold
         if(CV_params["keep last training"] and fold_id == CV_params["folds"]-1):
-            pass
+            print("Note: Keeping Trained Model")
         else:
             model.load_state_dict(model_state_backup)
 
