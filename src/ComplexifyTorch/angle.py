@@ -8,14 +8,29 @@ class AngleFunction(torch.autograd.Function):
     def forward(self,input):
         # Todo we negect tha cases Re(x) < 0, Im(x) = 0 => Pi
         #                      and Re(x) = Im(x)        => 0
-        self.save_for_backward(input)
+        input_mask = input.imag < 0
+
+        self.save_for_backward(input,input_mask)
+
         abs = torch.sqrt(input.real**2 + input.imag**2)
-        return 2 * torch.atan(input.imag/(abs+input.real))
+
+        output = torch.acos(input.real / abs)
+
+        output[input_mask] *= -1
+
+        return output
 
     @staticmethod
     def backward(self,grad_output):
-        input, = self.saved_tensors
+        input,input_mask = self.saved_tensors
 
-        return 0.5*(grad_output.conj() * (1j/input.conj()) - grad_output * (1j/input).conj())
+        abs_sq = input.real**2 + input.imag**2
+
+        output = grad_output * (input.real*input.imag/(abs_sq)).conj() \
+               + grad_output.conj() * (input.real - input.imag)/abs_sq
+
+        output[input_mask] *= -1
+
+        return output
 
 cangle = AngleFunction.apply
