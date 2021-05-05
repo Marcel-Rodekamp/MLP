@@ -38,9 +38,9 @@ def loadHDF5Data(fn, dataSet_path_flowed="phi_flowed", dataSet_path_unflowed="ph
 # Implement the data set class to interface to the data management of pytorch
 class Dataset(torch.utils.data.Dataset):
     'Characterizes a dataset for PyTorch'
-    def __init__(self,t_fn,on_gpu_flag = False, device = torch.device("cpu")):
+    def __init__(self,t_fn,on_gpu_flag = False, device = torch.device("cpu"),dataSet_path_flowed="phi_flowed", dataSet_path_unflowed="phi_unflowed"):
         'Initialization'
-        self.unflowed_confs,self.flowed_confs = loadHDF5Data(t_fn)
+        self.unflowed_confs,self.flowed_confs = loadHDF5Data(t_fn,dataSet_path_flowed,dataSet_path_unflowed)
         if on_gpu_flag:
             self.to(device)
 
