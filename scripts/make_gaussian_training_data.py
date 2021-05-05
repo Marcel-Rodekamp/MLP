@@ -3,6 +3,7 @@ from pathlib import Path
 import random
 import numpy as np
 import h5py as h5
+from scipy.optimize import minimize
 import yaml
 import isle
 
@@ -21,28 +22,31 @@ DATADIR = DIR/"./data/"
 
 # define the lattice you want to use. Note the isle documentation
 # https://evanberkowitz.github.io/isle/
-LATTICE = "triangle"
+LATTICE = "tetrahedron"
+
+startRePhi = 0.0  # set zero for main thimble
+startImPhi = 0.0  # just leave this as 0.0 for now. . .
 
 # define the model parameters for the (hubbard) model in isle
 PARAMS = isle.util.parameters(
     beta=6,
-    U=4,
+    U=3,
     mu=0,
     sigmaKappa=-1,
     hopping=isle.action.HFAHopping.EXP
 )
 
 # define the temporal direction discretization
-Nt = 16
+Nt = 64
 
 # define the number of training data points (data,label) you want to create
-NSAMPLES = 10_000
+NSAMPLES = 4000
 
 # define the parameters for the flow
 FLOW_PARAMS = isle.util.parameters(
-    flowTime=0.05*32/Nt,
-    minFlowTime=0.01*32/Nt,
-    stepSize=5e-4,
+    flowTime=0.025, #0.1*16/Nt,
+    minFlowTime=0.01, #0.04*16/Nt,
+    stepSize=5e-3, #5e-4,
     starty=None
 )
 
@@ -50,6 +54,37 @@ FLOW_PARAMS = isle.util.parameters(
 # Program definitions, don't change anything below here unless you know what you
 # are doing
 # ==============================================================================
+
+def RK4(phi,epsilon,action,n,direction):
+    if n == 0:
+        omega1 = 1./6
+        omega2 = 1./3
+        omega3 = 1./3
+        omega4 = 1./6
+        beta21 = 0.5
+        beta31 = 0.0
+        beta32 = 0.5
+        beta41 = 0.0
+        beta42 = 0.0
+        beta43 = 1.0
+    elif n == 1:
+        omega1 = .125
+        omega2 = .375
+        omega3 = .375
+        omega4 = .125
+        beta21 = 1/3.
+        beta31 = -1./3
+        beta32 = 1.0
+        beta41 = 1.0
+        beta42 = -1.0
+        beta43 = 1.0
+
+    k1 = -direction*isle.Vector(np.conj(action.force(phi)))
+    k2 = -direction*isle.Vector(np.conj(action.force(phi + epsilon * beta21 * k1)))
+    k3 = -direction*isle.Vector(np.conj(action.force(phi + epsilon * (beta31 * k1 + beta32 * k2))))
+    k4 = -direction*isle.Vector(np.conj(action.force(phi + epsilon * (beta41 * k1 + beta42 * k2 + beta43 * k3))))
+
+    return phi + epsilon * (omega1 * k1 + omega2 * k2 + omega3 * k3 + omega4 * k4)
 
 def randomSigns(rng, n):
     return rng.uniform(0, 2, n).astype(int)*2-1
@@ -62,7 +97,7 @@ def makeStartPhi(lat, params, starty, rng):
     sigma = rng.uniform(np.sqrt(params.tilde("U", lat)/(1+16/lat.nt())), np.sqrt(params.tilde("U", lat)/1.0), 1)[0]
 
     return isle.Vector(np.random.normal(0, sigma, lat.lattSize())
-                       + 0j), sigma
+                       + 1j*starty), sigma
 
 def makeAction(lattice, params):
     """
@@ -149,7 +184,7 @@ def preprocessFlowParams(lattice, params):
         return FLOW_PARAMS.replace(starty=flr.loadCriticalPoint(lattice, params.beta, params.U, 0)[0][0].imag)
     return FLOW_PARAMS
 
-def generate(overwrite):
+def generate(overwrite,tangent):
     """
     Generate and store a single dataset.
     """
@@ -166,6 +201,23 @@ def generate(overwrite):
     rng = isle.random.NumpyRNG(random.randint(0, 10000))
     action = makeAction(lattice, params)
 
+    def calcPhiNorm(x):
+        phi = isle.Vector(x[0]*np.ones(lattice.lattSize())
+                          +1j*x[1])
+        phi = isle.Vector(np.array(action.force(phi)));
+        return phi[0].real*phi[0].real+phi[0].imag*phi[0].imag;
+
+    starty = 0.0
+    
+    if tangent:
+        # First find critical point assuming constant phi
+        x0 = np.array([startRePhi,startImPhi])
+        res = minimize(calcPhiNorm, x0, method='nelder-mead',options={'xtol': 1e-14, 'disp': True})
+        print('# Critical phi @ ', res.x)
+        phi = isle.Vector(res.x[0]*np.ones(lattice.lattSize()) + 1j*res.x[1])
+        print('# S = ', action.eval(phi))
+        starty = res.x[1]
+
     flowTime = []
     width = []
 
@@ -177,7 +229,7 @@ def generate(overwrite):
         tries = 0
         while isample < NSAMPLES:
             tries += 1
-            phi_gauss, sigma = makeStartPhi(lattice, params, flowParams.starty, rng)
+            phi_gauss, sigma = makeStartPhi(lattice, params, starty, rng)
             phi_flowed, actVal, actualFlowTime = isle.rungeKutta4Flow(phi_gauss, action,
                                                                flowParams.flowTime,
                                                                flowParams.stepSize,
@@ -210,12 +262,14 @@ def main():
                                         defaultLog="none")
     parser.add_argument("--overwrite", action="store_true",
                         help="Overwrite existing output files.")
+    parser.add_argument("--tangent", action="store_true",
+                        help="Flow from tangent plane.")
     clArgs = isle.initialize(parser)
-
+    
     if not DATADIR.exists():
         DATADIR.mkdir()
 
-    generate(clArgs.overwrite)
+    generate(clArgs.overwrite,clArgs.tangent)
 
 
 if __name__ == "__main__":
