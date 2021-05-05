@@ -1,7 +1,7 @@
 import h5py as h5
 import torch
 
-def loadHDF5Data(fn, dataSet_path_flowed="phi_flowed", dataSet_path_unflowed="phi_gauss",stride=None):
+def loadHDF5Data(fn, dataSet_path_flowed="phi_flowed", dataSet_path_unflowed="phi_unflowed",stride=None):
     r"""!
         fn: string
             Path to the HDF5 Data
