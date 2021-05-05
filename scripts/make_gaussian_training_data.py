@@ -17,8 +17,7 @@ import isle
 # Parameters
 # ==============================================================================
 # name the path where you want to store the data. Should exist!
-DIR = Path(__file__).resolve().parent
-DATADIR = DIR/"./data/"
+DATADIR = Path("/data/Sign_Problem/Gaussian/")
 
 # define the lattice you want to use. Note the isle documentation
 # https://evanberkowitz.github.io/isle/
@@ -40,7 +39,7 @@ PARAMS = isle.util.parameters(
 Nt = 64
 
 # define the number of training data points (data,label) you want to create
-NSAMPLES = 4000
+NSAMPLES = 10000
 
 # define the parameters for the flow
 FLOW_PARAMS = isle.util.parameters(
@@ -208,7 +207,7 @@ def generate(overwrite,tangent):
         return phi[0].real*phi[0].real+phi[0].imag*phi[0].imag;
 
     starty = 0.0
-    
+
     if tangent:
         # First find critical point assuming constant phi
         x0 = np.array([startRePhi,startImPhi])
@@ -265,7 +264,7 @@ def main():
     parser.add_argument("--tangent", action="store_true",
                         help="Flow from tangent plane.")
     clArgs = isle.initialize(parser)
-    
+
     if not DATADIR.exists():
         DATADIR.mkdir()
 
