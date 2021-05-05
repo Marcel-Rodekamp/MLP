@@ -18,3 +18,5 @@ cmm = torch.ops.complexifyTorch_cpp.cmm
 
 # cadd(Tensor,Tensor) -> Tensor
 cadd = torch.ops.complexifyTorch_cpp.cadd
+
+cmv = torch.ops.complexifyTorch_cpp.cmv

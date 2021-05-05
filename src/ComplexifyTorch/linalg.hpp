@@ -14,6 +14,6 @@ TORCH_LIBRARY(complexifyTorch_cpp, m){
     m.def("cmatmul(Tensor input, Tensor other) -> Tensor");
     m.def("cmm(Tensor input, Tensor other) -> Tensor");
     m.def("cadd(Tensor input, Tensor other) -> Tensor");
+    m.def("cmv(Tensor input, Tensor other) -> Tensor");
 }
-
 #endif //LINALG_HPP

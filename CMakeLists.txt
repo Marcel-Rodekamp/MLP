@@ -10,6 +10,7 @@ set(LIBNAME "complexifyTorch_cpp")
 set(SOURCES
     src/ComplexifyTorch/cmatmul.cpp
     src/ComplexifyTorch/cadd.cpp
+    src/ComplexifyTorch/cmv.cpp
 )
 
 set(HEADERS
