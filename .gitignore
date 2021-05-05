@@ -4,3 +4,4 @@ BAK/
 dist/
 MLP.egg-info/
 results/
+scripts/parametrize_*
