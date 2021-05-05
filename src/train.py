@@ -1,7 +1,7 @@
 import torch
 from time import time_ns
 
-def train(train_dataLoader,valid_dataLoader,model,optimizer,loss_function,num_epochs=100):
+def train(train_dataLoader,valid_dataLoader,model,optimizer,loss_function,num_epochs=100,stop_at_nan = True):
     r"""
         train_dataLoader: torch.util.data.DataLoader
             Dataloader for the training data set, expecting a get of (data,label)
@@ -41,11 +41,16 @@ def train(train_dataLoader,valid_dataLoader,model,optimizer,loss_function,num_ep
             pred = model(mb_data)
             # compute the loss
             loss = loss_function(pred,mb_label)
+            if torch.isnan(loss) and stop_at_nan:
+                # if nan is found leave optimizer in normal state and return infinities for the loss
+                optimizer.zero_grad()
+                return torch.Tensor([float("Inf")]*num_epochs),torch.Tensor([float("Inf")]*num_epochs)
             # backpropagate
             loss.backward()
             # update parameters
             optimizer.step()
         train_loss[epoch] = loss.item()
+        #print(f"Current Loss [{epoch}] = {loss.item():.3e}")
         e_train += time_ns() * 1e-9 - s_train
 
         # ===========================
