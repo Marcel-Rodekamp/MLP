@@ -191,7 +191,7 @@ class RandomAffineCouplingLayer(torch.nn.Module):
         # for a given permutation sigma.
         # As A,B should make up the entire index set only half of this permuted
         # set is taken i.e. sigma(0),sigma(2),sigma(4),...
-        indices = torch.randperm(in_dim)[::2]
+        indices = torch.sort(torch.randperm(in_dim)[::2])[0]
         # These indices will now acount for partition B, where the affine transformation
         # is set.
         # To ensure that A,B are orthogonal (i.e. i \in A => i \not\in B) create
@@ -225,5 +225,5 @@ class RandomAffineCouplingLayer(torch.nn.Module):
 
         # pass the results in the autograd building block
         # ToDo: How to check for inference (we can then pass A_masked_input,B_masked_input as None)
-        #       effectively saving some memory 
+        #       effectively saving some memory
         return RandomAffineCouplingFunc(input,mul_res,add_res,self.indices,self.mask_A,self.mask_B,(A_masked_input,B_masked_input))
